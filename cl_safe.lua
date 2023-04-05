@@ -28,6 +28,7 @@ end
 
 function InitializeSafe(safeCombination)
 	_initDialRotationDirection = "Clockwise"
+	lib.requestStreamedTextureDict("commonmenu", 50)
 	_safeCombination = safeCombination
 
 	RelockSafe()
@@ -51,11 +52,18 @@ function DrawSprites(drawLocks)
 		local lockString
 		if lockActive then
 			lockString = "lock_closed"
+			DrawSprite(textureDict, lockString, xPos, yPos, 0.035, 0.05, 0.0, 255, 51, 0, 255)
+			
 		else
 			lockString = "lock_open"
+			DrawSprite(textureDict, lockString, xPos, yPos, 0.035, 0.05, 0.0, 51, 204, 51, 100)
+			
 		end
-
-		DrawSprite(textureDict,lockString,xPos,yPos,0.025,_aspectRatio*0.015,0,231,194,81,255)
+		if _currentDialRotationDirection == "Clockwise" then
+			DrawSprite("commonmenu", "arrowright", 0.5, 0.5, 0.035, 0.05, 0.0, 0, 255, 0, 255)
+		elseif _currentDialRotationDirection == "Anticlockwise" then
+			DrawSprite("commonmenu", "arrowleft", 0.5, 0.5, 0.035, 0.05, 0.0, 0, 255, 0, 255)
+		end
 		yPos = yPos + 0.05
 	end
 end
@@ -110,9 +118,9 @@ function RunMiniGame()
 end
 
 function HandleSafeDialMovement()
-	if IsControlJustPressed(0,34) then
+	if IsControlJustReleased(0, 34) then
 		RotateSafeDial("Anticlockwise")
-	elseif IsControlJustPressed(0,35) then
+	elseif IsControlJustReleased(0, 35) then
 		RotateSafeDial("Clockwise")
 	else
 		RotateSafeDial("Idle")
