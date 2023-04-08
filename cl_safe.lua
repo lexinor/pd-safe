@@ -5,7 +5,8 @@ _SafeCrackingStates = "Setup"
 function createSafe(combination)
 	local res
 	isMinigame = not isMinigame
-	RequestStreamedTextureDict("MPSafeCracking",false)
+	lib.requestStreamedTextureDict(Config.Dials.txtdict, 10)
+	lib.requestStreamedTextureDict(Config.Indicators.txtdict, 10)
 	RequestAmbientAudioBank("SAFE_CRACK",false)
 
 	if isMinigame then
@@ -27,8 +28,7 @@ function createSafe(combination)
 end
 
 function InitializeSafe(safeCombination)
-	_initDialRotationDirection = "Clockwise"
-	lib.requestStreamedTextureDict("commonmenu", 50)
+	_initDialRotationDirection = "Clockwise"	
 	_safeCombination = safeCombination
 
 	RelockSafe()
@@ -36,11 +36,10 @@ function InitializeSafe(safeCombination)
 end
 
 function DrawSprites(drawLocks)
-	local textureDict = "MPSafeCracking"
 	local _aspectRatio = GetAspectRatio(true)
     
-	DrawSprite(textureDict,"Dial_BG",0.48,0.3,0.3,_aspectRatio*0.3,0,255,255,255,255)
-	DrawSprite(textureDict,"Dial",0.48,0.3,0.3*0.5,_aspectRatio*0.3*0.5,SafeDialRotation,255,255,255,255)
+	DrawSprite(Config.Dials.txtdict, Config.Dials.back.txtName, Config.Dials.x, Config.Dials.y, 0.3, _aspectRatio*0.3, 0, 255, 255, 255, 255)
+	DrawSprite(Config.Dials.txtdict, Config.Dials.front.txtName, Config.Dials.x, Config.Dials.y, 0.3*0.5, _aspectRatio*0.3*0.5, SafeDialRotation, 255, 255, 255, 255)
 
 	if not drawLocks then
 		return
@@ -52,17 +51,17 @@ function DrawSprites(drawLocks)
 		local lockString
 		if lockActive then
 			lockString = "lock_closed"
-			DrawSprite(textureDict, lockString, xPos, yPos, 0.035, 0.05, 0.0, 255, 51, 0, 255)
+			DrawSprite(Config.Dials.txtdict, lockString, xPos, yPos, 0.035, 0.05, 0.0, 255, 51, 0, 255)
 			
 		else
 			lockString = "lock_open"
-			DrawSprite(textureDict, lockString, xPos, yPos, 0.035, 0.05, 0.0, 51, 204, 51, 100)
+			DrawSprite(Config.Dials.txtdict, lockString, xPos, yPos, 0.035, 0.05, 0.0, 51, 204, 51, 100)
 			
 		end
-		if _currentDialRotationDirection == "Clockwise" then
-			DrawSprite("commonmenu", "arrowright", 0.5, 0.5, 0.035, 0.05, 0.0, 0, 255, 0, 255)
-		elseif _currentDialRotationDirection == "Anticlockwise" then
-			DrawSprite("commonmenu", "arrowleft", 0.5, 0.5, 0.035, 0.05, 0.0, 0, 255, 0, 255)
+		if _requiredDialRotationDirection == "Clockwise" then
+			DrawSprite(Config.Indicators.txtdict, Config.Indicators.right.txtName, Config.Indicators.x, Config.Indicators.y, 0.035, 0.05, 0.0, 50, 220, 100, 255)
+		elseif _requiredDialRotationDirection == "Anticlockwise" then
+			DrawSprite(Config.Indicators.txtdict, Config.Indicators.left.txtName, Config.Indicators.x, Config.Indicators.y, 0.035, 0.05, 0.0, 50, 220, 100, 255)
 		end
 		yPos = yPos + 0.05
 	end
@@ -78,12 +77,12 @@ function RunMiniGame()
 			return false
 		end
 
-		if IsControlJustPressed(0,33) then
+		if IsControlJustPressed(0,73) then -- KEY => X
 			EndMiniGame(false)
 			return false
 		end
 
-		if IsControlJustPressed(0,32) then
+		if IsControlJustPressed(0, 51) then  -- KEY => E
 			if _onSpot then
 				ReleaseCurrentPin()
 				_onSpot = false
@@ -99,15 +98,17 @@ function RunMiniGame()
 
 		HandleSafeDialMovement()
 
-		local incorrectMovement = _currentLockNum ~= 0 and _requiredDialRotationDirection ~= "Idle" and _currentDialRotationDirection ~= "Idle" and _currentDialRotationDirection ~= _requiredDialRotationDirection
+		--local incorrectMovement = _currentLockNum ~= 0 and _requiredDialRotationDirection ~= "Idle" and _currentDialRotationDirection ~= "Idle" and _currentDialRotationDirection ~= _requiredDialRotationDirection
+		local incorrectMovement = _currentLockNum ~= 0 and _requiredDialRotationDirection ~= "Idle" and _currentDialRotationDirection ~= "Idle"
 
 		if not incorrectMovement then
 			local currentDialNumber = GetCurrentSafeDialNumber(SafeDialRotation)
-			local correctMovement = _requiredDialRotationDirection ~= "Idle" and (_currentDialRotationDirection == _requiredDialRotationDirection or _lastDialRotationDirection == _requiredDialRotationDirection)  
+			--local correctMovement = _requiredDialRotationDirection ~= "Idle" and (_currentDialRotationDirection == _requiredDialRotationDirection or _lastDialRotationDirection == _requiredDialRotationDirection)  
+			local correctMovement = _requiredDialRotationDirection ~= "Idle"
 			if correctMovement then
 				local pinUnlocked = _safeLockStatus[_currentLockNum] and currentDialNumber == _safeCombination[_currentLockNum]
 				if pinUnlocked then
-					PlaySoundFrontend(0,"TUMBLER_PIN_FALL","SAFE_CRACK_SOUNDSET",true)
+					PlaySoundFrontend(0,"TUMBLER_PIN_FALL","SAFE_CRACK_SOUNDSET",false)
 					_onSpot = true
 				end
 			end
@@ -118,9 +119,9 @@ function RunMiniGame()
 end
 
 function HandleSafeDialMovement()
-	if IsControlJustReleased(0, 34) then
+	if IsControlJustReleased(0, 34) then -- Key => Q or A
 		RotateSafeDial("Anticlockwise")
-	elseif IsControlJustReleased(0, 35) then
+	elseif IsControlJustReleased(0, 35) then -- Key => D
 		RotateSafeDial("Clockwise")
 	else
 		RotateSafeDial("Idle")
@@ -214,6 +215,7 @@ function EndMiniGame(safeUnlocked)
 	isMinigame = false
 	SafeCrackingStates = "Setup"
 	ClearPedTasksImmediately(PlayerPedId())
+	lib.hideTextUI()
 end
 
 function playFx(dict,anim)

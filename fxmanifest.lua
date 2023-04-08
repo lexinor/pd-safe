@@ -5,5 +5,6 @@ lua54 'yes'
 client_script "cl_safe.lua"
 
 shared_scripts {
-    '@ox_lib/init.lua'
+    "@ox_lib/init.lua",
+    "config.lua",
 }
