@@ -77,17 +77,17 @@ function RunMiniGame()
 			return false
 		end
 
-		if IsControlJustPressed(0,73) then -- KEY => X
+		if IsControlJustReleased(0, 73) then -- KEY => X
 			EndMiniGame(false)
 			return false
 		end
 
-		if IsControlJustPressed(0, 51) then  -- KEY => E
+		if IsControlJustReleased(0, 23) then  -- KEY => F
 			if _onSpot then
 				ReleaseCurrentPin()
 				_onSpot = false
 				if IsSafeUnlocked() then
-					EndMiniGame(true,false)
+					EndMiniGame(true)
 					return true
 				end
 			else
